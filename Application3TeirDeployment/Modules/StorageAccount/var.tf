@@ -1,0 +1,3 @@
+variable "Storage_AccountDetails" {
+
+}
