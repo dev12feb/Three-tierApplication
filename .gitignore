@@ -4,7 +4,9 @@
 # .tfstate files
 *.tfstate
 *.tfstate.*
-*.exe.*
+# Ignore files with extension `.class` & `.exe`
+*.class
+*.exe
 
 # Crash log files
 crash.log
