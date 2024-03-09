@@ -1,0 +1,47 @@
+trigger:
+- main
+
+variables:
+  - name: StateFile
+    value: ReactAppDeploy.terraform.tfstate
+
+pool:
+  vmImage: ubuntu-latest
+stages:
+  - stage: InitStage
+    displayName: Init Stage
+    jobs:
+      - job: InitJob
+        displayName: Init Job
+        steps:
+        - task: TerraformTaskV4@4
+          inputs:
+            provider: 'azurerm'
+            command: 'init'
+            backendServiceArm: 'ReactAppDeployInfra'
+            backendAzureRmResourceGroupName: 'DevSecOpSDivyansh'
+            backendAzureRmStorageAccountName: 'divyansh12storageaccount'
+            backendAzureRmContainerName: 'containerdivyansh'
+            backendAzureRmKey: '$(StateFile)'
+
+  - stage: PlanStage
+    dependsOn: InitStage
+    displayName: Plan Stage
+    jobs:
+      - job: PlanJob
+        displayName: Plan Job
+        steps:
+        - task: TerraformTaskV4@4
+          inputs:
+            provider: 'azurerm'
+            command: 'init'
+            backendServiceArm: 'ReactAppDeployInfra'
+            backendAzureRmResourceGroupName: 'DevSecOpSDivyansh'
+            backendAzureRmStorageAccountName: 'divyansh12storageaccount'
+            backendAzureRmContainerName: 'containerdivyansh'
+            backendAzureRmKey: '$(StateFile)'
+        - task: TerraformTaskV4@4
+          inputs:
+            provider: 'azurerm'
+            command: 'plan'
+            environmentServiceNameAzureRM: 'ReactAppDeployInfra'
