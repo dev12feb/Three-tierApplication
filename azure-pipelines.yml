@@ -35,7 +35,7 @@ stages:
           inputs:
             provider: 'azurerm'
             command: 'init'
-            workingDirectory: '$(System.DefaultWorkingDirectory)/Environment/Devlopment/'
+            workingDirectory: '$(System.DefaultWorkingDirectory)/Application3TeirDeployment/Environment/Devlopment/'
             backendServiceArm: 'ReactAppDeployInfra'
             backendAzureRmResourceGroupName: 'DevSecOpSDivyansh'
             backendAzureRmStorageAccountName: 'divyansh12storageaccount'
@@ -45,5 +45,5 @@ stages:
           inputs:
             provider: 'azurerm'
             command: 'plan'
-            workingDirectory: '$(System.DefaultWorkingDirectory)/Environment/Devlopment/'
+            workingDirectory: '$(System.DefaultWorkingDirectory)/Application3TeirDeployment/Environment/Devlopment/'
             environmentServiceNameAzureRM: 'ReactAppDeployInfra'
