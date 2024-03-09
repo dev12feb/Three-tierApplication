@@ -4,7 +4,7 @@ pool:
   vmImage: ubuntu-latest
 variables:
 - name: State_File_Name
-  value: Dev.terraform.tfstate
+  value: AppDeploy.terraform.tfstate
 
 stages:
   - stage: TerrafromValidate
@@ -20,7 +20,8 @@ stages:
           inputs:
             provider: 'azurerm'
             command: 'init'
-            backendServiceArm: 'DivyanshConnection'
+            workingDirectory: '$(System.DefaultWorkingDirectory)/Application3TeirDeployment/Environment/Devlopment/'
+            backendServiceArm: 'ReactAppDeployInfra'
             backendAzureRmResourceGroupName: 'DevSecOpSDivyansh'
             backendAzureRmStorageAccountName: 'divyansh12storageaccount'
             backendAzureRmContainerName: 'containerdivyansh'
@@ -44,8 +45,8 @@ stages:
           inputs:
             provider: 'azurerm'
             command: 'init'
-           # workingDirectory: '$(Build.SourcesDirectory)'
-            backendServiceArm: 'DivyanshConnection'
+            workingDirectory: '$(System.DefaultWorkingDirectory)/Application3TeirDeployment/Environment/Devlopment/'
+            backendServiceArm: 'ReactAppDeployInfra'
             backendAzureRmResourceGroupName: 'DevSecOpSDivyansh'
             backendAzureRmStorageAccountName: 'divyansh12storageaccount'
             backendAzureRmContainerName: 'containerdivyansh'
@@ -65,8 +66,8 @@ stages:
           inputs:
             provider: 'azurerm'
             command: 'init'
-          #  workingDirectory: '$(Build.SourcesDirectory)'
-            backendServiceArm: 'DivyanshConnection'
+            workingDirectory: '$(System.DefaultWorkingDirectory)/Application3TeirDeployment/Environment/Devlopment/'
+            backendServiceArm: 'ReactAppDeployInfra'
             backendAzureRmResourceGroupName: 'DevSecOpSDivyansh'
             backendAzureRmStorageAccountName: 'divyansh12storageaccount'
             backendAzureRmContainerName: 'containerdivyansh'
@@ -76,8 +77,8 @@ stages:
           inputs:
             provider: 'azurerm'
             command: 'plan'
-         #   workingDirectory: '$(Build.SourcesDirectory)'
-            environmentServiceNameAzureRM: 'DivyanshConnection'
+            workingDirectory: '$(System.DefaultWorkingDirectory)/Application3TeirDeployment/Environment/Devlopment/'
+            environmentServiceNameAzureRM: 'ReactAppDeployInfra'
 
   - stage: TfsecScanStage
     displayName: Tfsec Scan Stage
@@ -93,8 +94,8 @@ stages:
           inputs:
             provider: 'azurerm'
             command: 'init'
-          #  workingDirectory: '$(Build.SourcesDirectory)'
-            backendServiceArm: 'DivyanshConnection'
+            workingDirectory: '$(System.DefaultWorkingDirectory)/Application3TeirDeployment/Environment/Devlopment/'
+            backendServiceArm: 'ReactAppDeployInfra'
             backendAzureRmResourceGroupName: 'DevSecOpSDivyansh'
             backendAzureRmStorageAccountName: 'divyansh12storageaccount'
             backendAzureRmContainerName: 'containerdivyansh'
@@ -104,8 +105,8 @@ stages:
           inputs:
             provider: 'azurerm'
             command: 'plan'
-         #   workingDirectory: '$(Build.SourcesDirectory)'
-            environmentServiceNameAzureRM: 'DivyanshConnection'
+            workingDirectory: '$(System.DefaultWorkingDirectory)/Application3TeirDeployment/Environment/Devlopment/'
+            environmentServiceNameAzureRM: 'ReactAppDeployInfra'
 
         - script: |
             curl -LsSo tfsec https://github.com/tfsec/tfsec/releases/download/v0.58.1/tfsec-linux-amd64
@@ -148,15 +149,16 @@ stages:
           inputs:
             provider: 'azurerm'
             command: 'init'
-            backendServiceArm: 'DivyanshConnection'
+            workingDirectory: '$(System.DefaultWorkingDirectory)/Application3TeirDeployment/Environment/Devlopment/'
+            backendServiceArm: 'ReactAppDeployInfra'
             backendAzureRmResourceGroupName: 'DevSecOpSDivyansh'
             backendAzureRmStorageAccountName: 'divyansh12storageaccount'
             backendAzureRmContainerName: 'containerdivyansh'
-            backendAzureRmKey: $(State_File_Name)
+            backendAzureRmKey: '$(State_File_Name)'
         - task: TerraformTaskV4@4
           displayName: Terraform Apply
           inputs:
             provider: 'azurerm'
             command: 'apply'
-            environmentServiceNameAzureRM: 'DivyanshConnection'
+            environmentServiceNameAzureRM: 'ReactAppDeployInfra'
 
