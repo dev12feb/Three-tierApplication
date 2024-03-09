@@ -1,0 +1,162 @@
+trigger: none
+
+pool:
+  vmImage: ubuntu-latest
+variables:
+- name: State_File_Name
+  value: Dev.terraform.tfstate
+
+stages:
+  - stage: TerrafromValidate
+    displayName: Terraform Validate Stage
+    pool:
+      vmImage: ubuntu-latest
+    jobs:
+      - job: TerrafromValidateJob
+        displayName: Terraform Validate Job
+        steps:
+        - task: TerraformTaskV4@4
+          displayName: Terraform Init Task
+          inputs:
+            provider: 'azurerm'
+            command: 'init'
+            backendServiceArm: 'DivyanshConnection'
+            backendAzureRmResourceGroupName: 'DevSecOpSDivyansh'
+            backendAzureRmStorageAccountName: 'divyansh12storageaccount'
+            backendAzureRmContainerName: 'containerdivyansh'
+            backendAzureRmKey: '$(State_File_Name)'
+        - task: TerraformTaskV4@4
+          displayName: Validate Task
+          inputs:
+            provider: 'azurerm'
+            command: 'validate'
+
+  - stage: TerrafromInitStage
+    displayName: Terraform Init Stage
+    pool:
+      vmImage: ubuntu-latest
+    jobs:
+      - job: TerrafromInitJob
+        displayName: Terraform Init Job
+        steps:
+        - task: TerraformTaskV4@4
+          displayName: Terraform Init task
+          inputs:
+            provider: 'azurerm'
+            command: 'init'
+           # workingDirectory: '$(Build.SourcesDirectory)'
+            backendServiceArm: 'DivyanshConnection'
+            backendAzureRmResourceGroupName: 'DevSecOpSDivyansh'
+            backendAzureRmStorageAccountName: 'divyansh12storageaccount'
+            backendAzureRmContainerName: 'containerdivyansh'
+            backendAzureRmKey: $(State_File_Name)
+
+  - stage: TerraformPlanStage
+    dependsOn: TerrafromInitStage
+    displayName: Terraform Plan Stage
+    pool:
+      vmImage: ubuntu-latest
+    jobs:
+      - job: TerraformPlanJob
+        displayName: Terraform Plan Job
+        steps:
+        - task: TerraformTaskV4@4
+          displayName: Terraform Init task
+          inputs:
+            provider: 'azurerm'
+            command: 'init'
+          #  workingDirectory: '$(Build.SourcesDirectory)'
+            backendServiceArm: 'DivyanshConnection'
+            backendAzureRmResourceGroupName: 'DevSecOpSDivyansh'
+            backendAzureRmStorageAccountName: 'divyansh12storageaccount'
+            backendAzureRmContainerName: 'containerdivyansh'
+            backendAzureRmKey: $(State_File_Name)
+        - task: TerraformTaskV4@4
+          displayName: Plan Task
+          inputs:
+            provider: 'azurerm'
+            command: 'plan'
+         #   workingDirectory: '$(Build.SourcesDirectory)'
+            environmentServiceNameAzureRM: 'DivyanshConnection'
+
+  - stage: TfsecScanStage
+    displayName: Tfsec Scan Stage
+    dependsOn: TerraformPlanStage
+    pool:
+      vmImage: ubuntu-latest
+    jobs:
+      - job: TfsecScanJob
+        displayName: Terraform TfsecScan Job
+        steps:
+        - task: TerraformTaskV4@4
+          displayName: Terraform Init task
+          inputs:
+            provider: 'azurerm'
+            command: 'init'
+          #  workingDirectory: '$(Build.SourcesDirectory)'
+            backendServiceArm: 'DivyanshConnection'
+            backendAzureRmResourceGroupName: 'DevSecOpSDivyansh'
+            backendAzureRmStorageAccountName: 'divyansh12storageaccount'
+            backendAzureRmContainerName: 'containerdivyansh'
+            backendAzureRmKey: $(State_File_Name)
+        - task: TerraformTaskV4@4
+          displayName: Plan Task
+          inputs:
+            provider: 'azurerm'
+            command: 'plan'
+         #   workingDirectory: '$(Build.SourcesDirectory)'
+            environmentServiceNameAzureRM: 'DivyanshConnection'
+
+        - script: |
+            curl -LsSo tfsec https://github.com/tfsec/tfsec/releases/download/v0.58.1/tfsec-linux-amd64
+            chmod +x tfsec
+            sudo mv tfsec /usr/local/bin/
+          displayName: 'Install tfsec'
+        - task: CmdLine@2
+          displayName: 'Run tfsec'
+          inputs:
+            script: |
+              tfsec .
+          continueOnError: true  # This allows the pipeline to continue even if tfsec returns a non-zero exit code
+
+
+  - stage: ManualValidationStage
+    dependsOn: TfsecScanStage
+    pool: server
+    displayName: Manual Validation Stage
+    jobs:
+      - job: ManualValidationJob
+        displayName: Manual Validation Job
+        timeoutInMinutes: 90
+        steps:
+        - task: ManualValidation@0
+          displayName: Manual Validation Task
+          inputs:
+            notifyUsers: 'divyansh0012@gmail.com'
+            instructions: 'Please review plan and approve'
+  - stage: TerraformApplyStage
+    dependsOn: ManualValidationStage
+    pool:
+      vmImage: ubuntu-latest
+    displayName: Terraform Apply Stage
+    jobs:
+      - job: TerraformAppllyJob
+        displayName: Terraform Apply Job
+        steps:
+        - task: TerraformTaskV4@4
+          displayName: Terraform Init
+          inputs:
+            provider: 'azurerm'
+            command: 'init'
+            backendServiceArm: 'DivyanshConnection'
+            backendAzureRmResourceGroupName: 'DevSecOpSDivyansh'
+            backendAzureRmStorageAccountName: 'divyansh12storageaccount'
+            backendAzureRmContainerName: 'containerdivyansh'
+            backendAzureRmKey: $(State_File_Name)
+        - task: TerraformTaskV4@4
+          displayName: Terraform Apply
+          inputs:
+            provider: 'azurerm'
+            command: 'apply'
+            environmentServiceNameAzureRM: 'DivyanshConnection'
+
